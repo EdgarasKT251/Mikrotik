@@ -1,0 +1,35 @@
+
+/interface bridge
+add name=bridge1
+add name=bridge2
+/interface ethernet
+set [ find default-name=ether1 ] disable-running-check=no
+set [ find default-name=ether2 ] disable-running-check=no
+set [ find default-name=ether3 ] disable-running-check=no
+set [ find default-name=ether4 ] disable-running-check=no
+set [ find default-name=ether5 ] disable-running-check=no
+/interface wireless security-profiles
+set [ find default=yes ] supplicant-identity=MikroTik
+/ip pool
+add name=pool_b1 ranges=10.3.1.10-10.3.1.120
+add name=pool_b2 ranges=172.16.3.10-172.16.3.60
+/interface bridge port
+add bridge=bridge1 interface=ether2
+add bridge=bridge1 interface=ether3
+add bridge=bridge2 interface=ether4
+/ip address
+add address=10.3.1.1/25 interface=bridge1 network=10.3.1.0
+add address=172.16.3.1/26 interface=bridge2 network=172.16.3.0
+add address=192.168.3.1/27 interface=ether5 network=192.168.3.0
+/ip dhcp-client
+add interface=ether1
+/ip dhcp-server
+add address-pool=pool_b1 interface=bridge1 name=dhcp_b1
+add address-pool=pool_b2 interface=bridge2 name=dhcp_b2
+/ip dhcp-server network
+add address=10.3.1.0/25 dns-server=8.8.8.8 gateway=10.3.1.1
+add address=172.16.3.0/26 dns-server=8.8.8.8 gateway=172.16.3.1
+/ip firewall nat
+add action=masquerade chain=srcnat out-interface=ether1
+/ip route
+add dst-address=10.4.1.0/25 gateway=192.168.3.2
